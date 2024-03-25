@@ -1,0 +1,15 @@
+syntax = "proto3";
+package proto;
+option go_package =".;pb";
+
+
+message Ocupacion{
+  enum  Trabajos {
+      Desconocido =0;
+      Progrmador =1;
+      Disenador=2;
+      Pintor =3;
+
+      }
+    Trabajos Ocupacion =1;
+}

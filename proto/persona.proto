@@ -1,0 +1,12 @@
+syntax = "proto3";
+package proto;
+option go_package =".;pb";
+
+import "ocupacion.proto";
+
+message Persona {
+    string  nombre =1;
+    uint32 edad =2;
+    Ocupacion ocupacion =3;
+
+}

@@ -1,0 +1,21 @@
+syntax = "proto3";
+package proto;
+option go_package =".;pb";
+
+import "persona.proto";
+import "ocupacion.proto";
+
+message CreatePersonRequest{
+  string nombre =1;
+  int32 edad =2;
+  Ocupacion ocupacion=3;
+
+}
+
+message CreatePersonResponse{
+  Persona persona =1;
+}
+
+service ServerRpc{
+  rpc CreatePerson (CreatePersonRequest) returns( CreatePersonResponse);
+}
