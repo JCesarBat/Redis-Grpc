@@ -12,18 +12,25 @@ import (
 const createPersona = `-- name: CreatePersona :one
 INSERT INTO "persona"(
     nombre,
-    ocupacion
-)values ($1,$2) returning id, nombre, ocupacion
+    ocupacion,
+    edad
+)values ($1,$2,$3) returning id, nombre, ocupacion, edad
 `
 
 type CreatePersonaParams struct {
 	Nombre    string `json:"nombre"`
 	Ocupacion string `json:"ocupacion"`
+	Edad      int32  `json:"edad"`
 }
 
 func (q *Queries) CreatePersona(ctx context.Context, arg CreatePersonaParams) (Persona, error) {
-	row := q.db.QueryRowContext(ctx, createPersona, arg.Nombre, arg.Ocupacion)
+	row := q.db.QueryRowContext(ctx, createPersona, arg.Nombre, arg.Ocupacion, arg.Edad)
 	var i Persona
-	err := row.Scan(&i.ID, &i.Nombre, &i.Ocupacion)
+	err := row.Scan(
+		&i.ID,
+		&i.Nombre,
+		&i.Ocupacion,
+		&i.Edad,
+	)
 	return i, err
 }

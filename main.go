@@ -4,13 +4,17 @@ import (
 	"Redis/pb"
 	"Redis/server"
 	database "Redis/store/sqlc"
+	"context"
 	"database/sql"
 	"fmt"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/protobuf/encoding/protojson"
 	"log"
 	"net"
+	"net/http"
 )
 
 type Person struct {
@@ -27,7 +31,9 @@ func main() {
 		return
 	}
 	store := database.NewStore(conn)
+	go StartGateWey(store, context.Background())
 	StartGrpcServer(store)
+
 	/*
 		client := redis.NewClient(&redis.Options{
 			Addr:     "localhost:6379",
@@ -83,4 +89,39 @@ func StartGrpcServer(store *database.Store) {
 	if err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
+}
+func StartGateWey(store *database.Store, ctx context.Context) {
+	server := server.NewServer(store)
+
+	jsonOption := runtime.WithMarshalerOption(runtime.MIMEWildcard, &runtime.JSONPb{
+		MarshalOptions: protojson.MarshalOptions{
+			UseProtoNames: true,
+		},
+		UnmarshalOptions: protojson.UnmarshalOptions{
+			DiscardUnknown: true,
+		},
+	})
+
+	grpcMux := runtime.NewServeMux(jsonOption)
+
+	err := pb.RegisterServerRpcHandlerServer(ctx, grpcMux, server)
+	if err != nil {
+		log.Fatal("error ocurred in gatewey:", err)
+	}
+
+	mux := http.NewServeMux()
+	mux.Handle("/", grpcMux)
+
+	listener, err := net.Listen("tcp", "0.0.0.0:8000")
+	if err != nil {
+		log.Fatal("error ocurred listening the gatewey :", err)
+	}
+
+	fmt.Println("http server gatewey start in port  :8000")
+	err = http.Serve(listener, mux)
+
+	if err != nil {
+		log.Fatal("cannot start http gatewey")
+	}
+
 }

@@ -3,12 +3,12 @@ package proto;
 option go_package =".;pb";
 
 import "persona.proto";
-import "ocupacion.proto";
 
+import "google/api/annotations.proto";
 message CreatePersonRequest{
   string nombre =1;
   int32 edad =2;
-  Ocupacion ocupacion=3;
+  string ocupacion=3;
 
 }
 
@@ -17,5 +17,11 @@ message CreatePersonResponse{
 }
 
 service ServerRpc{
-  rpc CreatePerson (CreatePersonRequest) returns( CreatePersonResponse);
+  rpc CreatePerson (CreatePersonRequest) returns( CreatePersonResponse){
+    option (google.api.http) = {
+      post:"/v1/Create"
+      body:"*"
+
+    };
+  };
 }

@@ -10,4 +10,5 @@ type Persona struct {
 	ID        int64  `json:"id"`
 	Nombre    string `json:"nombre"`
 	Ocupacion string `json:"ocupacion"`
+	Edad      int32  `json:"edad"`
 }
